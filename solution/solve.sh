@@ -2,6 +2,7 @@
 set -euo pipefail
 
 cd /app
+mkdir -p src
 
 cat > package.json <<'EOF'
 {

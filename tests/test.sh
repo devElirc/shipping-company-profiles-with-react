@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+mkdir -p /logs/verifier
+
 # Check if we're in a valid working directory
 if [ "$PWD" = "/" ]; then
   echo "Error: No working directory set. Please set a WORKDIR in your Dockerfile before running this script."
@@ -26,6 +28,7 @@ cd /tests
 npm run test:e2e || E2E_EXIT=$?
 
 # Set the final command status without exiting early under set -e
+set +e
 if [ "$APP_EXIT" -eq 0 ] && [ "$E2E_EXIT" -eq 0 ]; then
   true
 else
