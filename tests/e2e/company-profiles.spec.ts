@@ -20,6 +20,16 @@ async function loadSeededCompanies() {
   }>;
 }
 
+function escapeRegex(text: string) {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function ratingTextPattern(company?: { averageRating?: number; reviewCount?: number }) {
+  const rating = company?.averageRating?.toFixed(1) ?? "";
+  const reviewCount = String(company?.reviewCount ?? "");
+  return new RegExp(`${escapeRegex(rating)}\\s*\\(${escapeRegex(reviewCount)}\\s+reviews\\)`, "i");
+}
+
 test("shows logos, fallback initials, verified badges, and ratings accessibly", async ({ page }) => {
   await page.goto("/");
 
@@ -31,16 +41,14 @@ test("shows logos, fallback initials, verified badges, and ratings accessibly", 
   await expect(atlas.getByRole("img", { name: "Atlas Freight Lines International logo" })).toBeVisible();
   await expect(atlas.getByRole("heading", { name: "Atlas Freight Lines International" })).toBeVisible();
   await expect(atlas.getByRole("img", { name: "Verified company" })).toBeVisible();
-  const atlasRatingText = `${atlasData?.averageRating?.toFixed(1)} (${atlasData?.reviewCount} reviews)`;
-  await expect(atlas).toContainText(new RegExp(atlasRatingText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"));
+  await expect(atlas).toContainText(ratingTextPattern(atlasData));
 
   const nova = page.getByRole("article", { name: "Nova Transport Partners" });
   await expect(nova.getByLabel("Nova Transport Partners initial")).toContainText("N");
   await expect(nova.getByRole("img", { name: /Nova Transport Partners logo/i })).toHaveCount(0);
   await expect(nova.getByRole("heading", { name: "Nova Transport Partners" })).toBeVisible();
   await expect(nova.getByRole("img", { name: "Verified company" })).toBeVisible();
-  const novaRatingText = `${novaData?.averageRating?.toFixed(1)} (${novaData?.reviewCount} reviews)`;
-  await expect(nova).toContainText(new RegExp(novaRatingText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"));
+  await expect(nova).toContainText(ratingTextPattern(novaData));
 });
 
 test("displays badges, trust scores, and semantic progress metrics", async ({ page }) => {
