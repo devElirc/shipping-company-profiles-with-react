@@ -83,6 +83,8 @@ function CompanyCard({ company }) {
   const hasRating = Number.isFinite(rating) && reviewCount != null;
   const trustScore = clampPercent(hasRating ? (rating / 5) * 100 : 0);
   const filledStars = hasRating ? Math.max(0, Math.min(5, Math.round(rating))) : 0;
+  const reviewLabel = hasRating ? `${reviewCount} ${reviewCount === 1 ? "review" : "reviews"}` : "";
+  const ratingSummary = hasRating ? `${rating.toFixed(1)} (${reviewLabel})` : "";
 
   return (
     <article className="company-card" aria-label={company.name}>
@@ -106,12 +108,12 @@ function CompanyCard({ company }) {
           </div>
 
           {hasRating ? (
-            <div className="rating-row" aria-label={`${rating} out of 5 stars`}>
+            <div className="rating-row" aria-label={`${ratingSummary}, ${rating.toFixed(1)} out of 5 stars`}>
               <span className="stars" aria-hidden="true">
                 {"\u2605".repeat(filledStars)}
                 {"\u2606".repeat(5 - filledStars)}
               </span>
-              <span>{rating.toFixed(1)} ({reviewCount} reviews)</span>
+              <span>{ratingSummary}</span>
             </div>
           ) : null}
         </div>
