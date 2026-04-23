@@ -10,12 +10,15 @@ if [ "$PWD" = "/" ]; then
   exit 1
 fi
 
-# Install test deps, Playwright system deps, and browser at run time
+# Install the verifier's pinned test dependencies from package-lock.json.
 cd /tests
-npm install
+npm ci
 export DEBIAN_FRONTEND=noninteractive
-npx playwright install-deps chromium
-npx playwright install chromium
+
+# Use the lockfile-pinned Playwright 1.49.0 binary. This installs only the
+# Chromium browser and host libraries needed by the visible E2E assertions.
+npx --no-install playwright install-deps chromium
+npx --no-install playwright install chromium
 
 APP_EXIT=0
 E2E_EXIT=0
@@ -25,6 +28,12 @@ npm install || APP_EXIT=$?
 npm run build || APP_EXIT=$?
 
 cd /tests
+# Run the visible Playwright spec directly. The spec verifies:
+# - one labelled article per seeded company
+# - logo alt text, fallback initials, verified badges, and rating text format
+# - hidden rating rows when rating values are missing
+# - badge chips, one Trust Score label, and metric progressbar ARIA values
+# - required CSS hooks: @media (max-width: 640px), ring-fill, metric-grow, stripes
 npm run test:e2e || E2E_EXIT=$?
 
 # Set the final command status without exiting early under set -e

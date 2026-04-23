@@ -8,11 +8,11 @@ Each company card should have three parts.
 At the top, show the company logo if it exists, using the company name followed by " logo" as the image alt text. 
 If it does not exist, show the first letter of the company name instead in an element labelled with the company name followed by "initial".
 Show the company name in an <h2>. Next to the name, show the verified badge image by using company.verifiedIconUrl, with "Verified company" as the alt text. 
-Show the five-star rating row only when both rating values exist.
+Show the five-star rating row only when both rating values exist. When it is shown, include the numeric rating and review count in the exact text format `4.7 (214 reviews)`, with the company values substituted and the rating shown to one decimal place.
 
 In the middle, add these three badges: "Verified", "Top Reviewed", and "Customer Favorite".
 
-At the bottom, show a circular Trust Score percentage based on the company rating. 
+At the bottom, show a circular Trust Score percentage based on the company rating. Render the visible text `Trust Score` only once per company card, and keep any decorative SVG or ring artwork hidden from assistive technology so it does not create a second `Trust Score` text or accessible-name match.
 Also show three metric rows for "Pricing Accuracy", "Communication", and "Vehicle Condition". 
 Each metric row should include progressbar accessibility, and aria-valuenow should use the whole-number percentage for that metric.
 

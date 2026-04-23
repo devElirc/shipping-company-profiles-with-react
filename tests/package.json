@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test e2e/company-profiles.spec.ts --project=chromium"
   },
   "devDependencies": {
     "@playwright/test": "1.49.0"

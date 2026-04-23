@@ -25,6 +25,19 @@ const companies = [
       vehicleCondition: 86,
     },
   },
+  {
+    id: "echo-logistics",
+    name: "Echo Logistics Group",
+    logoUrl: "",
+    verifiedIconUrl: "/verified-badge.svg",
+    averageRating: null,
+    reviewCount: null,
+    metrics: {
+      pricingAccuracy: 70,
+      communication: 75,
+      vehicleCondition: 68,
+    },
+  },
 ];
 
 export default companies;

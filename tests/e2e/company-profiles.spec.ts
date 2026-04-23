@@ -6,7 +6,8 @@ test("renders one labelled company article for each seeded company", async ({ pa
 
   await expect(page.getByRole("article", { name: "Atlas Freight Lines International" })).toBeVisible();
   await expect(page.getByRole("article", { name: "Nova Transport Partners" })).toBeVisible();
-  await expect(page.getByRole("article")).toHaveCount(2);
+  await expect(page.getByRole("article", { name: "Echo Logistics Group" })).toBeVisible();
+  await expect(page.getByRole("article")).toHaveCount(3);
 });
 
 async function loadSeededCompanies() {
@@ -15,8 +16,8 @@ async function loadSeededCompanies() {
   const mod = await import(pathToFileURL("/app/src/companyData.js").href);
   return mod.default as Array<{
     name: string;
-    averageRating?: number;
-    reviewCount?: number;
+    averageRating?: number | null;
+    reviewCount?: number | null;
   }>;
 }
 
@@ -24,7 +25,7 @@ function escapeRegex(text: string) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function ratingTextPattern(company?: { averageRating?: number; reviewCount?: number }) {
+function ratingTextPattern(company?: { averageRating?: number | null; reviewCount?: number | null }) {
   const rating = company?.averageRating?.toFixed(1) ?? "";
   const reviewCount = String(company?.reviewCount ?? "");
   return new RegExp(`${escapeRegex(rating)}\\s*\\(${escapeRegex(reviewCount)}\\s+reviews\\)`, "i");
@@ -49,6 +50,14 @@ test("shows logos, fallback initials, verified badges, and ratings accessibly", 
   await expect(nova.getByRole("heading", { name: "Nova Transport Partners" })).toBeVisible();
   await expect(nova.getByRole("img", { name: "Verified company" })).toBeVisible();
   await expect(nova).toContainText(ratingTextPattern(novaData));
+
+  const echo = page.getByRole("article", { name: "Echo Logistics Group" });
+  await expect(echo.getByLabel("Echo Logistics Group initial")).toContainText("E");
+  await expect(echo.getByRole("heading", { name: "Echo Logistics Group" })).toBeVisible();
+  await expect(echo.getByRole("img", { name: "Verified company" })).toBeVisible();
+  await expect(echo.getByLabel(/rating|stars/i)).toHaveCount(0);
+  await expect(echo).not.toContainText(/\breviews?\b/i);
+  await expect(echo).not.toContainText(/[\u2605\u2606]/);
 });
 
 test("displays badges, trust scores, and semantic progress metrics", async ({ page }) => {
@@ -58,6 +67,7 @@ test("displays badges, trust scores, and semantic progress metrics", async ({ pa
   await expect(atlas.getByText("Verified", { exact: true })).toBeVisible();
   await expect(atlas.getByText("Top Reviewed", { exact: true })).toBeVisible();
   await expect(atlas.getByText("Customer Favorite", { exact: true })).toBeVisible();
+  await expect(atlas.getByText("Trust Score")).toHaveCount(1);
   await expect(atlas.getByText("Trust Score")).toBeVisible();
   await expect(atlas.getByText("94%")).toBeVisible();
   await expect(atlas.getByRole("progressbar", { name: "Pricing Accuracy" })).toHaveAttribute("aria-valuenow", "92");
@@ -69,6 +79,11 @@ test("displays badges, trust scores, and semantic progress metrics", async ({ pa
   await expect(nova.getByRole("progressbar", { name: "Pricing Accuracy" })).toHaveAttribute("aria-valuenow", "82");
   await expect(nova.getByRole("progressbar", { name: "Communication" })).toHaveAttribute("aria-valuenow", "91");
   await expect(nova.getByRole("progressbar", { name: "Vehicle Condition" })).toHaveAttribute("aria-valuenow", "86");
+
+  const echo = page.getByRole("article", { name: "Echo Logistics Group" });
+  await expect(echo.getByRole("progressbar", { name: "Pricing Accuracy" })).toHaveAttribute("aria-valuenow", "70");
+  await expect(echo.getByRole("progressbar", { name: "Communication" })).toHaveAttribute("aria-valuenow", "75");
+  await expect(echo.getByRole("progressbar", { name: "Vehicle Condition" })).toHaveAttribute("aria-valuenow", "68");
 });
 
 test("includes the required animation and mobile CSS hooks", async ({ page }) => {
