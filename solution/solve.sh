@@ -75,7 +75,12 @@ const metricLabels = [
 
 function CompanyCard({ company }) {
   const rating = Number(company?.averageRating);
-  const hasRating = Number.isFinite(rating) && company?.reviewCount != null;
+  const reviewCountRaw = company?.reviewCount;
+  const parsedReviewCount = Number.isFinite(Number(reviewCountRaw))
+    ? Number(reviewCountRaw)
+    : Number.parseInt(String(reviewCountRaw ?? "").replace(/[^\d]/g, ""), 10);
+  const reviewCount = Number.isFinite(parsedReviewCount) ? parsedReviewCount : null;
+  const hasRating = Number.isFinite(rating) && reviewCount != null;
   const trustScore = clampPercent(hasRating ? (rating / 5) * 100 : 0);
   const filledStars = hasRating ? Math.max(0, Math.min(5, Math.round(rating))) : 0;
 
@@ -106,7 +111,7 @@ function CompanyCard({ company }) {
                 {"\u2605".repeat(filledStars)}
                 {"\u2606".repeat(5 - filledStars)}
               </span>
-              <span>{rating.toFixed(1)} ({company.reviewCount} reviews)</span>
+              <span>{rating.toFixed(1)} ({reviewCount} reviews)</span>
             </div>
           ) : null}
         </div>
