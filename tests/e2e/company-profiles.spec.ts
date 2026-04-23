@@ -31,18 +31,16 @@ test("shows logos, fallback initials, verified badges, and ratings accessibly", 
   await expect(atlas.getByRole("img", { name: "Atlas Freight Lines International logo" })).toBeVisible();
   await expect(atlas.getByRole("heading", { name: "Atlas Freight Lines International" })).toBeVisible();
   await expect(atlas.getByRole("img", { name: "Verified company" })).toBeVisible();
-  await expect(
-    atlas.getByText(`${atlasData?.averageRating?.toFixed(1)} (${atlasData?.reviewCount} reviews)`),
-  ).toBeVisible();
+  const atlasRatingText = `${atlasData?.averageRating?.toFixed(1)} (${atlasData?.reviewCount} reviews)`;
+  await expect(atlas).toContainText(new RegExp(atlasRatingText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"));
 
   const nova = page.getByRole("article", { name: "Nova Transport Partners" });
   await expect(nova.getByLabel("Nova Transport Partners initial")).toContainText("N");
   await expect(nova.getByRole("img", { name: /Nova Transport Partners logo/i })).toHaveCount(0);
   await expect(nova.getByRole("heading", { name: "Nova Transport Partners" })).toBeVisible();
   await expect(nova.getByRole("img", { name: "Verified company" })).toBeVisible();
-  await expect(
-    nova.getByText(`${novaData?.averageRating?.toFixed(1)} (${novaData?.reviewCount} reviews)`),
-  ).toBeVisible();
+  const novaRatingText = `${novaData?.averageRating?.toFixed(1)} (${novaData?.reviewCount} reviews)`;
+  await expect(nova).toContainText(new RegExp(novaRatingText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"));
 });
 
 test("displays badges, trust scores, and semantic progress metrics", async ({ page }) => {
