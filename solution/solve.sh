@@ -84,9 +84,9 @@ function CompanyCard({ company }) {
       <section className="card-top" aria-label={`${company.name} overview`}>
         <div className="logo-frame">
           {company.logoUrl ? (
-            <img src={company.logoUrl} alt={`${company.name} logo`} />
+            <img className="logo-image" src={company.logoUrl} alt={`${company.name} logo`} />
           ) : (
-            <span className="initial" aria-label={`${company.name} initial`}>
+            <span className="initial" role="img" aria-label={`${company.name} initial`}>
               {company.name?.charAt(0) || "?"}
             </span>
           )}
@@ -247,9 +247,11 @@ h1 {
   font-weight: 900;
 }
 
-.logo-frame img {
+.logo-image {
   width: 100%;
   height: 100%;
+  object-fit: contain;
+  padding: 10px;
 }
 
 .title-row {
@@ -396,6 +398,13 @@ h2 {
 @keyframes stripes {
   to {
     background-position: 32px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ring,
+  .metric-bar span {
+    animation: none;
   }
 }
 
