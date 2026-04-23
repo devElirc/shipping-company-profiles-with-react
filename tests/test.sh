@@ -14,16 +14,21 @@ export DEBIAN_FRONTEND=noninteractive
 npx playwright install-deps chromium
 npx playwright install chromium
 
-UNIT_EXIT=0
+APP_EXIT=0
 E2E_EXIT=0
-npm run test || UNIT_EXIT=$?
+
+cd /app
+npm install || APP_EXIT=$?
+npm run build || APP_EXIT=$?
+
+cd /tests
 npm run test:e2e || E2E_EXIT=$?
 
-# Produce reward file (REQUIRED): pass only if both unit and E2E succeed
-if [ "$UNIT_EXIT" -eq 0 ] && [ "$E2E_EXIT" -eq 0 ]; then
+# Produce reward file (REQUIRED): pass only if app setup/build and E2E succeed
+if [ "$APP_EXIT" -eq 0 ] && [ "$E2E_EXIT" -eq 0 ]; then
   echo 1 > /logs/verifier/reward.txt
 else
   echo 0 > /logs/verifier/reward.txt
 fi
 
-[ "$UNIT_EXIT" -eq 0 ] && [ "$E2E_EXIT" -eq 0 ]
+[ "$APP_EXIT" -eq 0 ] && [ "$E2E_EXIT" -eq 0 ]

@@ -15,11 +15,11 @@ export default defineConfig({
     trace: "off",
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
-  // Serve /app where the solution (and task root in sandbox) puts index.html.
   webServer: {
-    command: "npx serve /app -p 3000",
+    command: "npm run dev -- --host 0.0.0.0 --port 3000",
     url: "http://localhost:3000",
     reuseExistingServer: false,
-    timeout: 15_000,
+    timeout: 30_000,
+    cwd: "/app",
   },
 });
