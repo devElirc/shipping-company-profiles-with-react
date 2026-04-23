@@ -13,15 +13,11 @@ if [ "$PWD" = "/" ]; then
   exit 1
 fi
 
-# Install the verifier's test dependencies. Prefer the tracked lockfile when it
-# is present, but fall back to the package.json-pinned version for older task
-# bundles that may not yet include tests/package-lock.json.
+# Install the verifier's test dependencies from the exact versions pinned in
+# tests/package.json. This avoids brittle lockfile integrity mismatches across
+# container environments while still keeping Playwright pinned to 1.49.0.
 cd /tests
-if [ -f package-lock.json ]; then
-  npm ci || TEST_DEPS_EXIT=$?
-else
-  npm install --no-audit --no-fund || TEST_DEPS_EXIT=$?
-fi
+npm install --no-audit --no-fund || TEST_DEPS_EXIT=$?
 export DEBIAN_FRONTEND=noninteractive
 
 # Use the lockfile-pinned Playwright 1.49.0 binary. This installs only the
