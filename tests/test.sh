@@ -3,25 +3,25 @@ set -e
 
 mkdir -p /logs/verifier
 
+TEST_DEPS_EXIT=0
+APP_EXIT=0
+E2E_EXIT=0
+
 # Check if we're in a valid working directory
 if [ "$PWD" = "/" ]; then
   echo "Error: No working directory set. Please set a WORKDIR in your Dockerfile before running this script."
-  echo 0 > /logs/verifier/reward.txt
   exit 1
 fi
 
 # Install the verifier's pinned test dependencies from package-lock.json.
 cd /tests
-npm ci
+npm ci || TEST_DEPS_EXIT=$?
 export DEBIAN_FRONTEND=noninteractive
 
 # Use the lockfile-pinned Playwright 1.49.0 binary. This installs only the
 # Chromium browser and host libraries needed by the visible E2E assertions.
-npx --no-install playwright install-deps chromium
-npx --no-install playwright install chromium
-
-APP_EXIT=0
-E2E_EXIT=0
+npx --no-install playwright install-deps chromium || TEST_DEPS_EXIT=$?
+npx --no-install playwright install chromium || TEST_DEPS_EXIT=$?
 
 cd /app
 npm install || APP_EXIT=$?
@@ -34,11 +34,12 @@ cd /tests
 # - hidden rating rows when rating values are missing
 # - badge chips, one Trust Score label, and metric progressbar ARIA values
 # - required CSS hooks: @media (max-width: 640px), ring-fill, metric-grow, stripes
-npm run test:e2e || E2E_EXIT=$?
+if [ "$TEST_DEPS_EXIT" -eq 0 ]; then
+  npm run test:e2e || E2E_EXIT=$?
+fi
 
-# Set the final command status without exiting early under set -e
 set +e
-if [ "$APP_EXIT" -eq 0 ] && [ "$E2E_EXIT" -eq 0 ]; then
+if [ "$TEST_DEPS_EXIT" -eq 0 ] && [ "$APP_EXIT" -eq 0 ] && [ "$E2E_EXIT" -eq 0 ]; then
   true
 else
   false
