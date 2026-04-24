@@ -76,10 +76,10 @@ const metricLabels = [
 ];
 
 function CompanyCard({ company }) {
-  const rating = Number(company?.averageRating);
+  const rating = typeof company?.averageRating === "number" ? company.averageRating : null;
   const reviewCountRaw = company?.reviewCount;
-  const parsedReviewCount = Number.isFinite(Number(reviewCountRaw))
-    ? Number(reviewCountRaw)
+  const parsedReviewCount = typeof reviewCountRaw === "number"
+    ? reviewCountRaw
     : Number.parseInt(String(reviewCountRaw ?? "").replace(/[^\d]/g, ""), 10);
   const reviewCount = Number.isFinite(parsedReviewCount) ? parsedReviewCount : null;
   const hasRating = Number.isFinite(rating) && reviewCount != null;
