@@ -143,7 +143,7 @@ test("displays badges, trust scores, and semantic progress metrics", async ({ pa
 
   const echo = page.getByRole("article", { name: "Echo Logistics Group" });
   await expect(echo.getByText(/Trust Score/i)).toBeVisible();
-  await expect(echo.getByText("0%")).toBeVisible();
+  await expect(echo.getByText("0%", { exact: true })).toBeVisible();
   await expect(echo.getByRole("progressbar", { name: "Pricing Accuracy" })).toHaveAttribute("aria-valuenow", "70");
   await expect(echo.getByRole("progressbar", { name: "Communication" })).toHaveAttribute("aria-valuenow", "75");
   await expect(echo.getByRole("progressbar", { name: "Vehicle Condition" })).toHaveAttribute("aria-valuenow", "68");
