@@ -104,7 +104,8 @@ test("shows logos, fallback initials, verified badges, and ratings accessibly", 
   await expect(echo.getByLabel("Echo Logistics Group initial")).toContainText("E");
   await expect(echo.getByRole("heading", { name: "Echo Logistics Group" })).toBeVisible();
   await expect(echo.getByRole("img", { name: "Verified company" })).toBeVisible();
-  await expect(echo.getByLabel(/rating|stars/i)).toHaveCount(0);
+  await expect(echo.locator(".rating-row")).toHaveCount(0);
+  await expect(echo.locator(".stars")).toHaveCount(0);
   await expect(echo).not.toContainText(/\breviews?\b/i);
   await expect(echo).not.toContainText(/[\u2605\u2606]/);
 });
