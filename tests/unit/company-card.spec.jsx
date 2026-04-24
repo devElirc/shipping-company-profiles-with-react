@@ -1,3 +1,4 @@
+import React from "react";
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import App from "/app/src/App.jsx";

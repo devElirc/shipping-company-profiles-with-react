@@ -160,8 +160,11 @@ test("includes the required animation and mobile CSS hooks", async ({ page }) =>
 test("uses a readable single-column mobile layout", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
+  await expect(page.getByRole("article").first()).toBeVisible();
 
-  const gridColumns = await page.locator(".profile-grid").evaluate((element) => getComputedStyle(element).gridTemplateColumns);
+  const grid = page.locator(".profile-grid");
+  await expect(grid).toBeVisible();
+  const gridColumns = await grid.evaluate((element) => getComputedStyle(element).gridTemplateColumns);
   expect(gridColumns.split(" ").filter(Boolean)).toHaveLength(1);
 
   const articleCount = await page.getByRole("article").count();
