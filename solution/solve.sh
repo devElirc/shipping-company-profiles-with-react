@@ -122,9 +122,11 @@ function CompanyCard({ company }) {
       </section>
 
       <section className="badges" aria-label={`${company.name} highlights`}>
-        <span>Verified</span>
-        <span>Top Reviewed</span>
-        <span>Customer Favorite</span>
+        <ul className="badge-list">
+          <li>Verified</li>
+          <li>Top Reviewed</li>
+          <li>Customer Favorite</li>
+        </ul>
       </section>
 
       <section className="card-bottom" aria-label={`${company.name} performance metrics`}>
@@ -299,13 +301,19 @@ h2 {
 }
 
 .badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
   padding: 0 24px 24px;
 }
 
-.badges span {
+.badge-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.badge-list li {
   border: 1px solid rgba(20, 124, 114, 0.22);
   border-radius: 999px;
   padding: 8px 12px;
@@ -441,6 +449,10 @@ h2 {
 
   .badges {
     padding: 0 18px 18px;
+  }
+
+  .badge-list {
+    gap: 8px;
   }
 
   .metric-label {
