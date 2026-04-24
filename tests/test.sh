@@ -18,8 +18,9 @@ fi
 # Install curl for the uv bootstrap; install uv for pytest unit tests (Harbor pattern).
 if [ "$SCRIPT_EXIT" -eq 0 ]; then
   export DEBIAN_FRONTEND=noninteractive
+  echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections 2>/dev/null || true
   apt-get update -qq || SCRIPT_EXIT=$?
-  apt-get install -y -qq curl ca-certificates || SCRIPT_EXIT=$?
+  apt-get install -y -qq curl ca-certificates apt-utils || SCRIPT_EXIT=$?
 fi
 
 if [ "$SCRIPT_EXIT" -eq 0 ]; then

@@ -14,7 +14,7 @@ When it is shown, include the numeric rating and review count in the exact text 
 In the middle, add these three badges: "Verified", "Top Reviewed", and "Customer Favorite". 
 Present them as a real HTML list inside each card so there are exactly three list items (for example using ul/li).
 
-At the bottom, show a circular Trust Score percentage based on the company rating. Render the visible text `Trust Score` only once per company card, and keep any decorative SVG or ring artwork hidden from assistive technology so it does not create a second `Trust Score` text or accessible-name match.
+At the bottom, show a circular Trust Score percentage based on the company rating (when there is no usable rating, show `0%`). Every card must still show the Trust Score label and percentage so the bottom section never disappears for missing ratings. Render the visible text `Trust Score` only once per company card, and keep any decorative SVG or ring artwork hidden from assistive technology so it does not create a second `Trust Score` text or accessible-name match.
 Also show three metric rows for "Pricing Accuracy", "Communication", and "Vehicle Condition". 
 Each metric row should include progressbar accessibility, and aria-valuenow should use the whole-number percentage for that metric.
 

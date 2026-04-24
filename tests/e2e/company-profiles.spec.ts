@@ -119,7 +119,7 @@ test("displays badges, trust scores, and semantic progress metrics", async ({ pa
     "Echo Logistics Group",
   ]) {
     const card = page.getByRole("article", { name });
-    await expect(card.getByText("Trust Score")).toHaveCount(1);
+    await expect(card.getByText(/Trust Score/i)).toHaveCount(1);
     const badgeList = card.getByRole("list");
     await expect(badgeList).toBeVisible();
     await expect(badgeList.getByRole("listitem")).toHaveCount(3);
@@ -142,6 +142,8 @@ test("displays badges, trust scores, and semantic progress metrics", async ({ pa
   await expect(nova.getByRole("progressbar", { name: "Vehicle Condition" })).toHaveAttribute("aria-valuenow", "86");
 
   const echo = page.getByRole("article", { name: "Echo Logistics Group" });
+  await expect(echo.getByText(/Trust Score/i)).toBeVisible();
+  await expect(echo.getByText("0%")).toBeVisible();
   await expect(echo.getByRole("progressbar", { name: "Pricing Accuracy" })).toHaveAttribute("aria-valuenow", "70");
   await expect(echo.getByRole("progressbar", { name: "Communication" })).toHaveAttribute("aria-valuenow", "75");
   await expect(echo.getByRole("progressbar", { name: "Vehicle Condition" })).toHaveAttribute("aria-valuenow", "68");
@@ -150,32 +152,36 @@ test("displays badges, trust scores, and semantic progress metrics", async ({ pa
 test("honors prefers-reduced-motion for trust ring and metric bar animations", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
+  await page.reload();
 
-  const ringMotion = await page
-    .locator(".ring")
-    .first()
-    .evaluate((el) => {
-      const style = getComputedStyle(el);
-      return { animationName: style.animationName, animationDuration: style.animationDuration };
-    });
-  expect(
-    ringMotion.animationName === "none" ||
-      ringMotion.animationDuration === "0s" ||
-      ringMotion.animationName === "",
-  ).toBeTruthy();
+  const mediaMatches = await page.evaluate(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  expect(mediaMatches).toBe(true);
 
-  const metricMotion = await page
-    .locator(".metric-bar span")
-    .first()
-    .evaluate((el) => {
-      const style = getComputedStyle(el);
-      return { animationName: style.animationName, animationDuration: style.animationDuration };
-    });
-  expect(
-    metricMotion.animationName === "none" ||
-      metricMotion.animationDuration === "0s" ||
-      metricMotion.animationName === "",
-  ).toBeTruthy();
+  const motionStopped = await page.evaluate(() => {
+    const re = /^(ring-fill|metric-grow|stripes)$/;
+    const articles = document.querySelectorAll("article");
+    for (const article of articles) {
+      for (const el of article.querySelectorAll("*")) {
+        const style = getComputedStyle(el);
+        const names = style.animationName
+          .split(",")
+          .map((part) => part.trim())
+          .filter(Boolean);
+        const durations = style.animationDuration.split(",").map((part) => part.trim());
+        for (let index = 0; index < names.length; index += 1) {
+          const name = names[index];
+          if (!re.test(name)) continue;
+          const duration = durations[index] ?? style.animationDuration;
+          if (name !== "none" && duration !== "0s") {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  });
+
+  expect(motionStopped).toBeTruthy();
 });
 
 test("includes the required animation and mobile CSS hooks", async ({ page }) => {
