@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 
 const expectedCompanyDataSource = `const companies = [
@@ -46,18 +47,7 @@ const expectedCompanyDataSource = `const companies = [
 export default companies;
 `;
 
-test("renders one labelled company article for each seeded company", async ({ page }) => {
-  await page.goto("/");
-
-  await expect(page.getByRole("article", { name: "Atlas Freight Lines International" })).toBeVisible();
-  await expect(page.getByRole("article", { name: "Nova Transport Partners" })).toBeVisible();
-  await expect(page.getByRole("article", { name: "Echo Logistics Group" })).toBeVisible();
-  await expect(page.getByRole("article")).toHaveCount(3);
-});
-
 async function loadSeededCompanies() {
-  // The environment seeds `/app/src/companyData.js` into the runtime image.
-  // Import it to keep expectations aligned with the seeded dataset.
   const mod = await import(pathToFileURL("/app/src/companyData.js").href);
   return mod.default as Array<{
     name: string;
@@ -76,8 +66,16 @@ function ratingTextPattern(company?: { averageRating?: number | null; reviewCoun
   return new RegExp(`${escapeRegex(rating)}\\s*\\(${escapeRegex(reviewCount)}\\s+reviews\\)`, "i");
 }
 
+test("renders one labelled company article for each seeded company", async ({ page }) => {
+  await page.goto("/");
+
+  await expect(page.getByRole("article", { name: "Atlas Freight Lines International" })).toBeVisible();
+  await expect(page.getByRole("article", { name: "Nova Transport Partners" })).toBeVisible();
+  await expect(page.getByRole("article", { name: "Echo Logistics Group" })).toBeVisible();
+  await expect(page.getByRole("article")).toHaveCount(3);
+});
+
 test("keeps the seeded companyData.js file unchanged", async () => {
-  const { readFile } = await import("node:fs/promises");
   const currentSource = await readFile("/app/src/companyData.js", "utf8");
   expect(currentSource).toBe(expectedCompanyDataSource);
 });
@@ -114,12 +112,11 @@ test("shows logos, fallback initials, verified badges, and ratings accessibly", 
 test("displays badges, trust scores, and semantic progress metrics", async ({ page }) => {
   await page.goto("/");
 
-  const cardNames = [
+  for (const name of [
     "Atlas Freight Lines International",
     "Nova Transport Partners",
     "Echo Logistics Group",
-  ];
-  for (const name of cardNames) {
+  ]) {
     const card = page.getByRole("article", { name });
     await expect(card.getByText("Trust Score")).toHaveCount(1);
   }

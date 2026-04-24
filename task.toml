@@ -14,16 +14,16 @@ number_of_milestones = 0
 # Size of the codebase: minimal -> 0-20 files, small -> 20+ files, large -> 200+ files
 codebase_size = "minimal"
 # Coding languages used in the oracle solution or required by the agent
-languages = [ "bash", "javascript", "css", "html" ]
+languages = [ "bash", "javascript", "jsx", "css", "html" ]
 # For tool_specific, api_integration, and db_interaction subcategories, please include specific tool, api framework, or database software
-tags = [ "react", "vite", "playwright", "responsive-ui" ]
+tags = [ "react", "vite", "playwright", "accessibility", "responsive-ui", "frontend" ]
 # Estimated time to complete (minutes)
 expert_time_estimate_min = 60
 junior_time_estimate_min = 120
 
 # Verifier: runs the test script to check task completion
 [verifier]
-timeout_sec = 600.0
+timeout_sec = 900.0
 
 # Agent: limits how long the agent can run when attempting the task
 [agent]

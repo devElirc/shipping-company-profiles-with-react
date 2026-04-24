@@ -3,9 +3,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:e2e": "playwright test test_outputs.spec.ts --project=chromium"
+    "test:unit": "vitest run --config vitest.config.ts",
+    "test:e2e": "playwright test e2e/company-profiles.spec.ts --project=chromium"
   },
   "devDependencies": {
-    "@playwright/test": "1.49.0"
+    "@playwright/test": "1.49.0",
+    "@testing-library/jest-dom": "6.6.3",
+    "@testing-library/react": "16.1.0",
+    "jsdom": "25.0.1",
+    "vitest": "2.1.8"
   }
 }

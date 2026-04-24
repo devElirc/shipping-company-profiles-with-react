@@ -454,8 +454,7 @@ EOF
 npm install
 npm run build
 
-DEV_SERVER_LOG=/tmp/shipping-company-profiles-dev.log
-npm run dev -- --host 127.0.0.1 --port 3000 >"$DEV_SERVER_LOG" 2>&1 &
+npm run dev -- --host 127.0.0.1 --port 3000 >/tmp/shipping-company-profiles-dev.log 2>&1 &
 DEV_SERVER_PID=$!
 trap 'kill "$DEV_SERVER_PID" 2>/dev/null || true' EXIT
 
