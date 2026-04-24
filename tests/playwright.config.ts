@@ -4,7 +4,7 @@ import { defineConfig, devices } from "@playwright/test";
  * E2E tests run against the app at /app (served by webServer).
  */
 export default defineConfig({
-  testDir: "./e2e",
+  testDir: ".",
   fullyParallel: true,
   forbidOnly: true,
   retries: 0,

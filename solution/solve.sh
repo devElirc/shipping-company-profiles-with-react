@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 cd /app
@@ -16,13 +16,14 @@ cat > package.json <<'EOF'
     "preview": "vite preview"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "4.3.4",
-    "vite": "6.0.7",
-    "typescript": "5.6.3",
     "react": "19.0.0",
     "react-dom": "19.0.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@vitejs/plugin-react": "4.3.4",
+    "vite": "6.0.7"
+  },
+  "packageManager": "npm@10.8.2"
 }
 EOF
 
@@ -452,3 +453,17 @@ EOF
 
 npm install
 npm run build
+
+DEV_SERVER_LOG=/tmp/shipping-company-profiles-dev.log
+npm run dev -- --host 127.0.0.1 --port 3000 >"$DEV_SERVER_LOG" 2>&1 &
+DEV_SERVER_PID=$!
+trap 'kill "$DEV_SERVER_PID" 2>/dev/null || true' EXIT
+
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+  if node -e "fetch('http://127.0.0.1:3000').then((response) => { if (!response.ok) process.exit(1); }).catch(() => process.exit(1));"; then
+    break
+  fi
+  sleep 1
+done
+
+node -e "fetch('http://127.0.0.1:3000').then(async (response) => { const html = await response.text(); if (!response.ok || !html.includes('<div id=\"root\"></div>')) process.exit(1); }).catch(() => process.exit(1));"

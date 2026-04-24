@@ -1,16 +1,18 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -uo pipefail
 
 mkdir -p /logs/verifier
 
 TEST_DEPS_EXIT=0
 APP_EXIT=0
 E2E_EXIT=0
+SCRIPT_EXIT=0
 
 # Check if we're in a valid working directory
 if [ "$PWD" = "/" ]; then
   echo "Error: No working directory set. Please set a WORKDIR in your Dockerfile before running this script."
-  exit 1
+  SCRIPT_EXIT=1
+  exit "$SCRIPT_EXIT"
 fi
 
 # Install the verifier's test dependencies from the exact versions pinned in
@@ -34,16 +36,23 @@ npm run build || APP_EXIT=$?
 cd /tests
 # Run the visible Playwright spec directly. The spec verifies:
 # - one labelled article per seeded company
+# - the seeded /app/src/companyData.js file remains unchanged
 # - logo alt text, fallback initials, verified badges, and rating text format
 # - hidden rating rows when rating values are missing
-# - badge chips, one Trust Score label, and metric progressbar ARIA values
-# - required CSS hooks: @media (max-width: 640px), ring-fill, metric-grow, stripes
+# - badge chips, one Trust Score label per card, and metric progressbar ARIA values
+# - the app serves successfully via the Vite dev server started by Playwright
+# - required CSS hooks plus mobile layout readability checks
 if [ "$TEST_DEPS_EXIT" -eq 0 ]; then
   npm run test:e2e || E2E_EXIT=$?
 fi
 
-set +e
 if [ "$TEST_DEPS_EXIT" -eq 0 ] && [ "$APP_EXIT" -eq 0 ] && [ "$E2E_EXIT" -eq 0 ]; then
+  SCRIPT_EXIT=0
+else
+  SCRIPT_EXIT=1
+fi
+
+if [ "$SCRIPT_EXIT" -eq 0 ]; then
   true
 else
   false
@@ -54,3 +63,5 @@ if [ $? -eq 0 ]; then
 else
   echo 0 > /logs/verifier/reward.txt
 fi
+
+exit "$SCRIPT_EXIT"

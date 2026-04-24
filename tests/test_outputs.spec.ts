@@ -1,6 +1,51 @@
 import { expect, test } from "@playwright/test";
 import { pathToFileURL } from "node:url";
 
+const expectedCompanyDataSource = `const companies = [
+  {
+    id: "atlas-freight",
+    name: "Atlas Freight Lines International",
+    logoUrl: "/atlas-logo.svg",
+    verifiedIconUrl: "/verified-badge.svg",
+    averageRating: 4.7,
+    reviewCount: 214,
+    metrics: {
+      pricingAccuracy: 92,
+      communication: 88,
+      vehicleCondition: 95,
+    },
+  },
+  {
+    id: "nova-transport",
+    name: "Nova Transport Partners",
+    logoUrl: "",
+    verifiedIconUrl: "/verified-badge.svg",
+    averageRating: 4.2,
+    reviewCount: 87,
+    metrics: {
+      pricingAccuracy: 82,
+      communication: 91,
+      vehicleCondition: 86,
+    },
+  },
+  {
+    id: "echo-logistics",
+    name: "Echo Logistics Group",
+    logoUrl: "",
+    verifiedIconUrl: "/verified-badge.svg",
+    averageRating: null,
+    reviewCount: null,
+    metrics: {
+      pricingAccuracy: 70,
+      communication: 75,
+      vehicleCondition: 68,
+    },
+  },
+];
+
+export default companies;
+`;
+
 test("renders one labelled company article for each seeded company", async ({ page }) => {
   await page.goto("/");
 
@@ -30,6 +75,12 @@ function ratingTextPattern(company?: { averageRating?: number | null; reviewCoun
   const reviewCount = String(company?.reviewCount ?? "");
   return new RegExp(`${escapeRegex(rating)}\\s*\\(${escapeRegex(reviewCount)}\\s+reviews\\)`, "i");
 }
+
+test("keeps the seeded companyData.js file unchanged", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const currentSource = await readFile("/app/src/companyData.js", "utf8");
+  expect(currentSource).toBe(expectedCompanyDataSource);
+});
 
 test("shows logos, fallback initials, verified badges, and ratings accessibly", async ({ page }) => {
   await page.goto("/");
@@ -63,11 +114,20 @@ test("shows logos, fallback initials, verified badges, and ratings accessibly", 
 test("displays badges, trust scores, and semantic progress metrics", async ({ page }) => {
   await page.goto("/");
 
+  const cardNames = [
+    "Atlas Freight Lines International",
+    "Nova Transport Partners",
+    "Echo Logistics Group",
+  ];
+  for (const name of cardNames) {
+    const card = page.getByRole("article", { name });
+    await expect(card.getByText("Trust Score")).toHaveCount(1);
+  }
+
   const atlas = page.getByRole("article", { name: "Atlas Freight Lines International" });
   await expect(atlas.getByText("Verified", { exact: true })).toBeVisible();
   await expect(atlas.getByText("Top Reviewed", { exact: true })).toBeVisible();
   await expect(atlas.getByText("Customer Favorite", { exact: true })).toBeVisible();
-  await expect(atlas.getByText("Trust Score")).toHaveCount(1);
   await expect(atlas.getByText("Trust Score")).toBeVisible();
   await expect(atlas.getByText("94%")).toBeVisible();
   await expect(atlas.getByRole("progressbar", { name: "Pricing Accuracy" })).toHaveAttribute("aria-valuenow", "92");
@@ -98,4 +158,20 @@ test("includes the required animation and mobile CSS hooks", async ({ page }) =>
   expect(cssText).toContain("@keyframes metric-grow");
   expect(cssText).toContain("@keyframes stripes");
   expect(cssText).toContain("@media (max-width: 640px)");
+});
+
+test("uses a readable single-column mobile layout", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+
+  const gridColumns = await page.locator(".profile-grid").evaluate((element) => getComputedStyle(element).gridTemplateColumns);
+  expect(gridColumns.split(" ").filter(Boolean)).toHaveLength(1);
+
+  const articleCount = await page.getByRole("article").count();
+  const viewportWidth = await page.evaluate(() => window.innerWidth);
+  for (let index = 0; index < articleCount; index += 1) {
+    const box = await page.getByRole("article").nth(index).boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.width).toBeLessThanOrEqual(viewportWidth);
+  }
 });
