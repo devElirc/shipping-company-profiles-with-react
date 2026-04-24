@@ -2,8 +2,9 @@
 
 These run after ``npm run build`` in ``/app`` and before Playwright end-to-end tests.
 They scan the agent's source tree and production artifacts for the behaviors described
-in ``instruction.md`` (structure, copy, motion hooks, accessibility hooks). They do not
-replace Playwright; they catch missing wiring before the browser suite runs.
+in ``instruction.md`` (structure, copy, motion hooks, accessibility hooks, Vite React
+plugin wiring, and the ``createRoot`` mount on ``#root``). They do not replace Playwright;
+they catch missing wiring before the browser suite runs.
 """
 
 from __future__ import annotations

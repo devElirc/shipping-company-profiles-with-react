@@ -104,8 +104,6 @@ test("shows logos, fallback initials, verified badges, and ratings accessibly", 
   await expect(echo.getByLabel("Echo Logistics Group initial")).toContainText("E");
   await expect(echo.getByRole("heading", { name: "Echo Logistics Group" })).toBeVisible();
   await expect(echo.getByRole("img", { name: "Verified company" })).toBeVisible();
-  await expect(echo.locator(".rating-row")).toHaveCount(0);
-  await expect(echo.locator(".stars")).toHaveCount(0);
   await expect(echo).not.toContainText(/\breviews?\b/i);
   await expect(echo).not.toContainText(/[\u2605\u2606]/);
 });
@@ -129,24 +127,40 @@ test("displays badges, trust scores, and semantic progress metrics", async ({ pa
   await expect(atlas.getByText("Verified", { exact: true })).toBeVisible();
   await expect(atlas.getByText("Top Reviewed", { exact: true })).toBeVisible();
   await expect(atlas.getByText("Customer Favorite", { exact: true })).toBeVisible();
-  await expect(atlas.getByText("Trust Score")).toBeVisible();
-  await expect(atlas.getByText("94%")).toBeVisible();
+  await expect(atlas.getByText("Trust Score", { exact: true })).toBeVisible();
+  await expect(atlas.locator('[aria-hidden="true"]').getByText("94%", { exact: true })).toHaveCount(0);
+  await expect(atlas.getByText("94%", { exact: true })).toHaveCount(1);
   await expect(atlas.getByRole("progressbar", { name: "Pricing Accuracy" })).toHaveAttribute("aria-valuenow", "92");
   await expect(atlas.getByRole("progressbar", { name: "Communication" })).toHaveAttribute("aria-valuenow", "88");
   await expect(atlas.getByRole("progressbar", { name: "Vehicle Condition" })).toHaveAttribute("aria-valuenow", "95");
 
   const nova = page.getByRole("article", { name: "Nova Transport Partners" });
-  await expect(nova.getByText("84%")).toBeVisible();
+  await expect(nova.locator('[aria-hidden="true"]').getByText("84%", { exact: true })).toHaveCount(0);
+  await expect(nova.getByText("84%", { exact: true })).toHaveCount(1);
   await expect(nova.getByRole("progressbar", { name: "Pricing Accuracy" })).toHaveAttribute("aria-valuenow", "82");
   await expect(nova.getByRole("progressbar", { name: "Communication" })).toHaveAttribute("aria-valuenow", "91");
   await expect(nova.getByRole("progressbar", { name: "Vehicle Condition" })).toHaveAttribute("aria-valuenow", "86");
 
   const echo = page.getByRole("article", { name: "Echo Logistics Group" });
   await expect(echo.getByText(/Trust Score/i)).toBeVisible();
-  await expect(echo.getByText("0%", { exact: true })).toBeVisible();
+  await expect(echo.locator('[aria-hidden="true"]').getByText("0%", { exact: true })).toHaveCount(0);
+  await expect(echo.getByText("0%", { exact: true })).toHaveCount(1);
   await expect(echo.getByRole("progressbar", { name: "Pricing Accuracy" })).toHaveAttribute("aria-valuenow", "70");
   await expect(echo.getByRole("progressbar", { name: "Communication" })).toHaveAttribute("aria-valuenow", "75");
   await expect(echo.getByRole("progressbar", { name: "Vehicle Condition" })).toHaveAttribute("aria-valuenow", "68");
+});
+
+test("places the badge list between the title row and the trust score block in document flow", async ({ page }) => {
+  await page.goto("/");
+  const atlas = page.getByRole("article", { name: "Atlas Freight Lines International" });
+  const headingBox = await atlas.getByRole("heading", { name: "Atlas Freight Lines International" }).boundingBox();
+  const listBox = await atlas.getByRole("list").boundingBox();
+  const trustLabelBox = await atlas.getByText("Trust Score", { exact: true }).boundingBox();
+  expect(headingBox).not.toBeNull();
+  expect(listBox).not.toBeNull();
+  expect(trustLabelBox).not.toBeNull();
+  expect(listBox!.y).toBeGreaterThanOrEqual(headingBox!.y - 2);
+  expect(trustLabelBox!.y).toBeGreaterThan(listBox!.y + listBox!.height / 2 - 4);
 });
 
 test("honors prefers-reduced-motion for trust ring and metric bar animations", async ({ page }) => {

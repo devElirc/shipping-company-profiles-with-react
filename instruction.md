@@ -1,20 +1,20 @@
 Build a React + Vite profile page in /app for the shipping companies exported from /app/src/companyData.js. 
 Keep that data file unchanged and use it as the source for the rendered company profiles. Leave the existing SVG files under /app/public/ in place so the logo and verified badge URLs from the data keep resolving. Render one accessible <article> per company using the company name as the article label.
 
-The /app project should be a working Vite app: dependencies install successfully, the development server starts, and the production build completes.
+The /app project should be a working Vite app: dependencies install successfully, the development server starts, and the production build completes. Configure Vite with `@vitejs/plugin-react`, and mount the app with `createRoot` from `react-dom/client` on the element `document.getElementById("root")` from `/app/index.html`.
 
-Each company card should have three parts.
+Each company card should have three parts: at the top the logo or initial, name, and optional rating; in the middle the badge list; at the bottom the trust score and metric rows (the bottom area may use a responsive grid, but the badge list must appear between the header block and that bottom area in normal document flow).
 
 At the top, show the company logo if it exists, using the company name followed by " logo" as the image alt text. 
 If it does not exist, show the first letter of the company name instead in an element labelled with the company name followed by "initial".
 Show the company name in an <h2>. Next to the name, show the verified badge image by using company.verifiedIconUrl, with "Verified company" as the alt text. 
-Show the five-star rating row only when both rating values exist. 
-When it is shown, include the numeric rating and review count in the exact text format `4.7 (214 reviews)`, with the company values substituted and the rating shown to one decimal place.
+Show the five-star rating row only when both `averageRating` and `reviewCount` from the data are non-null (each must be present as a number in the source, not `null` or `undefined`). The numeric value `0` counts as present: if both are zero, still show the row as `0.0 (0 reviews)`. When either field is null or undefined in the data, omit the entire rating row (including any star glyphs).
+When the row is shown, include the numeric rating and review count in the exact text format `4.7 (214 reviews)`, with the company values substituted and the rating shown to one decimal place.
 
 In the middle, add these three badges: "Verified", "Top Reviewed", and "Customer Favorite". 
 Present them as a real HTML list inside each card so there are exactly three list items (for example using ul/li).
 
-At the bottom, show a circular Trust Score percentage based on the company rating (when there is no usable rating, show `0%`). Every card must still show the Trust Score label and percentage so the bottom section never disappears for missing ratings. Render the visible text `Trust Score` only once per company card, and keep any decorative SVG or ring artwork hidden from assistive technology so it does not create a second `Trust Score` text or accessible-name match.
+At the bottom, show a circular Trust Score. Compute the whole-number percentage as `Math.round((averageRating / 5) * 100)` when a usable numeric rating exists (for example `4.7` stars → `94%`); when there is no usable rating, show `0%`. Every card must still show the Trust Score label and that percentage so the bottom section never disappears for missing ratings. The percentage string (for example `94%`) must appear exactly once per card as normal visible text and must not be duplicated inside any subtree marked `aria-hidden` (decorate the ring without repeating the same percent text there). Render the visible words `Trust Score` only once per company card, and keep any decorative SVG or ring artwork hidden from assistive technology so it does not create a second `Trust Score` text or accessible-name match.
 Also show three metric rows for "Pricing Accuracy", "Communication", and "Vehicle Condition". 
 Each metric row should include progressbar accessibility, and aria-valuenow should use the whole-number percentage for that metric.
 

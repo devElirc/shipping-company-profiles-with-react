@@ -77,8 +77,10 @@ fi
 # - the app serves successfully via the Vite dev server started by Playwright
 # - required CSS hooks plus mobile layout readability checks
 # - prefers-reduced-motion disables trust ring and metric bar motion
+# E2E runs whenever the app build and Playwright setup succeeded, even if unit
+# tests failed, so browser failures are still visible in the log.
 
-if [ "$TEST_DEPS_EXIT" -eq 0 ] && [ "$APP_EXIT" -eq 0 ] && [ "$UNIT_EXIT" -eq 0 ]; then
+if [ "$TEST_DEPS_EXIT" -eq 0 ] && [ "$APP_EXIT" -eq 0 ]; then
   echo "Running end-to-end tests..."
   cd /tests
   npm run test:e2e || E2E_EXIT=$?

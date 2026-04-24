@@ -76,14 +76,20 @@ const metricLabels = [
 ];
 
 function CompanyCard({ company }) {
-  const rating = typeof company?.averageRating === "number" ? company.averageRating : null;
-  const reviewCountRaw = company?.reviewCount;
-  const parsedReviewCount = typeof reviewCountRaw === "number"
-    ? reviewCountRaw
-    : Number.parseInt(String(reviewCountRaw ?? "").replace(/[^\d]/g, ""), 10);
-  const reviewCount = Number.isFinite(parsedReviewCount) ? parsedReviewCount : null;
-  const hasRating = Number.isFinite(rating) && reviewCount != null;
-  const trustScore = clampPercent(hasRating ? (rating / 5) * 100 : 0);
+  const ar = company?.averageRating;
+  const rc = company?.reviewCount;
+  const hasRating =
+    ar !== null &&
+    ar !== undefined &&
+    rc !== null &&
+    rc !== undefined &&
+    typeof ar === "number" &&
+    typeof rc === "number" &&
+    Number.isFinite(ar) &&
+    Number.isFinite(rc);
+  const rating = hasRating ? ar : null;
+  const reviewCount = hasRating ? rc : null;
+  const trustScore = clampPercent(hasRating ? Math.round((rating / 5) * 100) : 0);
   const filledStars = hasRating ? Math.max(0, Math.min(5, Math.round(rating))) : 0;
   const reviewLabel = hasRating ? `${reviewCount} ${reviewCount === 1 ? "review" : "reviews"}` : "";
   const ratingSummary = hasRating ? `${rating.toFixed(1)} (${reviewLabel})` : "";
@@ -131,8 +137,11 @@ function CompanyCard({ company }) {
 
       <section className="card-bottom" aria-label={`${company.name} performance metrics`}>
         <div className="trust-score" style={{ "--score": trustScore }}>
-          <div className="ring" aria-hidden="true">
-            <span>{trustScore}%</span>
+          <div className="ring-stack">
+            <div className="ring" aria-hidden="true">
+              <span className="ring-inner" aria-hidden="true" />
+            </div>
+            <span className="ring-value">{trustScore}%</span>
           </div>
           <p>Trust Score</p>
         </div>
@@ -334,26 +343,44 @@ h2 {
   text-align: center;
 }
 
+.ring-stack {
+  position: relative;
+  width: 106px;
+  height: 106px;
+  margin: 0 auto 8px;
+}
+
 .ring {
+  position: absolute;
+  inset: 0;
   display: grid;
   width: 106px;
   height: 106px;
   place-items: center;
-  margin: 0 auto 8px;
   border-radius: 50%;
   background: conic-gradient(#f5c15d calc(var(--score) * 1%), rgba(255, 255, 255, 0.18) 0);
   animation: ring-fill 900ms ease-out both;
 }
 
-.ring span {
+.ring-inner {
   display: grid;
   width: 74px;
   height: 74px;
   place-items: center;
   border-radius: 50%;
   background: #143f49;
+}
+
+.ring-value {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 1;
   font-size: 1.25rem;
   font-weight: 900;
+  color: #fff7df;
+  pointer-events: none;
 }
 
 .trust-score p {
