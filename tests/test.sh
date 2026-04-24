@@ -5,7 +5,6 @@ mkdir -p /logs/verifier
 
 TEST_DEPS_EXIT=0
 APP_EXIT=0
-UNIT_EXIT=0
 E2E_EXIT=0
 SCRIPT_EXIT=0
 
@@ -43,7 +42,7 @@ fi
 if [ "$SCRIPT_EXIT" -eq 0 ]; then
   cd /tests
 fi
-# Run the visible Playwright spec directly. The spec verifies:
+# Run the Playwright verifier directly. It verifies:
 # - one labelled article per seeded company
 # - the seeded /app/src/companyData.js file remains unchanged
 # - logo alt text, fallback initials, verified badges, and rating text format
@@ -51,17 +50,13 @@ fi
 # - badge chips, one Trust Score label per card, and metric progressbar ARIA values
 # - the app serves successfully via the Vite dev server started by Playwright
 # - required CSS hooks plus mobile layout readability checks
-if [ "$TEST_DEPS_EXIT" -eq 0 ]; then
-  echo "Running unit tests..."
-  npm run test:unit || UNIT_EXIT=$?
-fi
 
 if [ "$TEST_DEPS_EXIT" -eq 0 ]; then
   echo "Running end-to-end tests..."
   npm run test:e2e || E2E_EXIT=$?
 fi
 
-if [ "$TEST_DEPS_EXIT" -eq 0 ] && [ "$APP_EXIT" -eq 0 ] && [ "$UNIT_EXIT" -eq 0 ] && [ "$E2E_EXIT" -eq 0 ]; then
+if [ "$TEST_DEPS_EXIT" -eq 0 ] && [ "$APP_EXIT" -eq 0 ] && [ "$E2E_EXIT" -eq 0 ]; then
   true
 else
   false

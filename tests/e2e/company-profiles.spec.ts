@@ -162,16 +162,21 @@ test("uses a readable single-column mobile layout", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("article").first()).toBeVisible();
 
-  const grid = page.locator(".profile-grid");
-  await expect(grid).toBeVisible();
-  const gridColumns = await grid.evaluate((element) => getComputedStyle(element).gridTemplateColumns);
-  expect(gridColumns.split(" ").filter(Boolean)).toHaveLength(1);
-
   const articleCount = await page.getByRole("article").count();
+  expect(articleCount).toBe(3);
+
   const viewportWidth = await page.evaluate(() => window.innerWidth);
+  const boxes = [];
   for (let index = 0; index < articleCount; index += 1) {
     const box = await page.getByRole("article").nth(index).boundingBox();
     expect(box).not.toBeNull();
     expect(box!.width).toBeLessThanOrEqual(viewportWidth);
+    boxes.push(box!);
   }
+
+  const [first, second, third] = boxes;
+  expect(Math.abs(first.x - second.x)).toBeLessThanOrEqual(2);
+  expect(Math.abs(second.x - third.x)).toBeLessThanOrEqual(2);
+  expect(second.y).toBeGreaterThan(first.y + first.height - 2);
+  expect(third.y).toBeGreaterThan(second.y + second.height - 2);
 });
